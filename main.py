@@ -17,10 +17,9 @@ img_transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-celebA_folder = 'C:/Users/Mucahid/Desktop/img_align_celeba/'
+celebA_folder = "DataFolder"
 dataset = dset.ImageFolder(root=celebA_folder, transform=img_transform)
 lengths = [int(len(dataset) * 0.9), int(len(dataset) * 0.1) + 1]
-# lengths = [182339, 20260]
 train_set, test_set = torch.utils.data.random_split(dataset, lengths)
 tr_dataloader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
 tt_dataloader = DataLoader(test_set, batch_size=batch_size, shuffle=True)
@@ -97,7 +96,10 @@ class NeuralNetwork(nn.Module):
         return tensor
 
 
-device = torch.device('cuda')
+if torch.cuda.is_available():
+    device = torch.device('cuda')
+else:
+    device = torch.device('cpu')
 
 model = NeuralNetwork()
 
@@ -105,18 +107,21 @@ model.train()
 # model.eval()
 model = model.to(device)
 print(model)
+# train parameters
 l_R = 1e-4
+l_2 = 1e-5
 epoch_size = 520
-start = time.time()
-
-optimizer = optim.Adam(model.parameters(), lr=l_R, weight_decay=1e-5)
-
+# optimizer fuction init
+optimizer = optim.Adam(model.parameters(), lr=l_R, weight_decay=l_2)
+# loss function init
 criterion = nn.MSELoss()
 
+start = time.time()
 for epoch in range(epoch_size):
     i = 0
     for i_batch, (image, _) in enumerate(tr_dataloader):
         labels = image.to(device)
+        # take data left hand side half for input 
         images = image.permute(3, 1, 2, 0)[:64].permute(3, 1, 2, 0).to(device)
         res = model(images)
         loss = criterion(res, labels)
@@ -124,13 +129,18 @@ for epoch in range(epoch_size):
         optimizer.step()
         print("Batch : ", i_batch, " Epoch : ", epoch, " Loss : ", loss.item())
         i += loss.item()
+        
+        # Output visualization on going train
         if i_batch % 50 == 0:
             trans = transforms.ToPILImage()
             im = res.cpu()
             im_in = images.cpu()
             im_l = labels.cpu()
+            # input image
             im1 = trans(im[0])
+            # label image
             im2 = trans(im_l[0])
+            # network output image
             im3 = trans(im_in[0])
             Image._show(im1)
             Image._show(im2)
