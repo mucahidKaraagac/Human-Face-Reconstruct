@@ -6,5 +6,5 @@ Encode part of it gather any data can be taken on given input. Besides this part
 Decode part of network basically every layer using upsample and conv2d for the extend input height, width and doing an unpack like operation for the construct an output image for the network.  
 Constructed output image (Tensor) used on MSELoss for the calculate loss for the optimizing gradients in all the neurons in our network. With this operation our network fine tune it selves help of the loss value and starting learning how to operate the given input.
 Optimizer is Adam algorithm that can be used instead of the classical stochastic gradient descent procedure to update network weights iterative based in training data. It is used the loss values to do its job which is provided by MSELoss.
-
+# Result of the Network
 ![image](https://user-images.githubusercontent.com/58566560/172106939-23924575-0b98-432c-beca-29366081d23a.png)
